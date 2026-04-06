@@ -77,6 +77,7 @@ export interface MuestraForm {
   estudio_pericial_solicitado: boolean
   codigo_idif_manual: string
   tipos_estudio_ids: number[]
+  analisis_ia?: string | null
 }
 
 export interface RecepcionForm {
