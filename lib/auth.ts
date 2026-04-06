@@ -3,7 +3,11 @@ import jwt from 'jsonwebtoken'
 import { SessionUser } from '@/types'
 import { cookies } from 'next/headers'
 
-const JWT_SECRET = process.env.JWT_SECRET!
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET
+  if (!secret) throw new Error('JWT_SECRET no está definida en las variables de entorno.')
+  return secret
+}
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 12)
@@ -14,12 +18,12 @@ export async function verifyPassword(password: string, hash: string) {
 }
 
 export function signToken(user: SessionUser) {
-  return jwt.sign(user, JWT_SECRET, { expiresIn: '8h' })
+  return jwt.sign(user, getJwtSecret(), { expiresIn: '8h' })
 }
 
 export function verifyToken(token: string): SessionUser | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as SessionUser
+    return jwt.verify(token, getJwtSecret()) as SessionUser
   } catch {
     return null
   }
