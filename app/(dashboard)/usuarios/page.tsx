@@ -41,8 +41,6 @@ export default function UsuariosPage() {
   }
 
   const pendientes = usuarios.filter((u) => u.estado === 'PENDIENTE')
-  const activos = usuarios.filter((u) => u.estado === 'ACTIVO')
-  const bloqueados = usuarios.filter((u) => u.estado === 'BLOQUEADO')
 
   const estadoBadge = (estado: string) => {
     if (estado === 'ACTIVO') return <span className="badge-success">ACTIVO</span>
@@ -57,47 +55,46 @@ export default function UsuariosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-slate-900">Gestión de usuarios</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Aprobación y control de acceso al sistema</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-slate-900">Gestión de usuarios</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Vista completa del padrón de usuarios</p>
+        </div>
+        <a href="/aprobacion" className="btn-primary text-sm">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          Ir a Aprobación
+          {pendientes.length > 0 && (
+            <span className="ml-1 bg-amber-400 text-amber-900 text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              {pendientes.length}
+            </span>
+          )}
+        </a>
       </div>
 
-      {/* Solicitudes pendientes */}
+      {/* Solicitudes pendientes destacadas */}
       {pendientes.length > 0 && (
-        <div className="card overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+        <div className="card overflow-hidden border-amber-200">
+          <div className="px-5 py-4 border-b border-amber-100 bg-amber-50 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-            <h2 className="text-sm font-semibold text-slate-800">
-              Solicitudes pendientes ({pendientes.length})
+            <h2 className="text-sm font-semibold text-amber-800">
+              Solicitudes pendientes de aprobación ({pendientes.length})
             </h2>
           </div>
           <div className="divide-y divide-slate-100">
             {pendientes.map((u) => (
-              <div key={u.id} className="px-5 py-4 flex items-center justify-between gap-4">
+              <div key={u.id} className="px-5 py-4 flex items-center justify-between gap-4 bg-amber-50/40">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-700 text-sm">
                     {u.nombre.charAt(0)}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-slate-800">{u.nombre}</p>
-                    <p className="text-xs text-slate-500">{u.email} · CI: {u.ci}</p>
+                    <p className="text-xs text-slate-500">{u.email} · CI: {u.ci} · {u.ciudad}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => accion(u.id, 'aprobar')}
-                    disabled={accionando === u.id}
-                    className="btn-primary text-xs py-1.5 px-3"
-                  >
-                    Aprobar
-                  </button>
-                  <button
-                    onClick={() => accion(u.id, 'bloquear')}
-                    disabled={accionando === u.id}
-                    className="btn-danger text-xs py-1.5 px-3"
-                  >
-                    Rechazar
-                  </button>
+                  <button onClick={() => accion(u.id, 'aprobar')} disabled={accionando === u.id} className="btn-primary text-xs py-1.5 px-3">Aprobar</button>
+                  <button onClick={() => accion(u.id, 'bloquear')} disabled={accionando === u.id} className="btn-danger text-xs py-1.5 px-3">Rechazar</button>
                 </div>
               </div>
             ))}
@@ -105,69 +102,49 @@ export default function UsuariosPage() {
         </div>
       )}
 
-      {/* Tabla de todos los usuarios */}
+      {/* Tabla completa */}
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100">
-          <h2 className="text-sm font-semibold text-slate-800">
-            Todos los usuarios ({usuarios.length})
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-800">Todos los usuarios ({usuarios.length})</h2>
         </div>
         {loading ? (
-          <div className="flex items-center justify-center py-12 text-sm text-slate-400">
-            Cargando usuarios...
-          </div>
+          <div className="flex items-center justify-center py-12 text-sm text-slate-400">Cargando usuarios...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
-                  {['Nombre', 'CI', 'Email', 'Rol', 'Estado', 'Registro', 'Acciones'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                      {h}
-                    </th>
+                  {['Nombre', 'CI', 'Ciudad', 'Email', 'Rol', 'Estado', 'Registro', 'Acciones'].map((h) => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {usuarios.map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-slate-800">{u.nombre}</td>
+                    <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">{u.nombre}</td>
                     <td className="px-4 py-3 font-mono text-slate-600">{u.ci}</td>
+                    <td className="px-4 py-3 text-slate-600">{u.ciudad}</td>
                     <td className="px-4 py-3 text-slate-600">{u.email}</td>
                     <td className="px-4 py-3">{rolBadge(u.rol)}</td>
                     <td className="px-4 py-3">{estadoBadge(u.estado)}</td>
-                    <td className="px-4 py-3 text-slate-500 text-xs">
+                    <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
                       {new Date(u.created_at).toLocaleDateString('es-BO')}
                     </td>
                     <td className="px-4 py-3">
-                      {u.id !== user.id && (
+                      {u.id !== user?.id && (
                         <div className="flex items-center gap-1.5">
                           {u.estado === 'ACTIVO' && (
-                            <button
-                              onClick={() => accion(u.id, 'bloquear')}
-                              disabled={accionando === u.id}
-                              className="text-xs px-2.5 py-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-                            >
-                              Bloquear
-                            </button>
+                            <button onClick={() => accion(u.id, 'bloquear')} disabled={accionando === u.id}
+                              className="text-xs px-2.5 py-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition-colors">Bloquear</button>
                           )}
                           {u.estado === 'BLOQUEADO' && (
-                            <button
-                              onClick={() => accion(u.id, 'activar')}
-                              disabled={accionando === u.id}
-                              className="text-xs px-2.5 py-1 rounded-md bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-                            >
-                              Reactivar
-                            </button>
+                            <button onClick={() => accion(u.id, 'activar')} disabled={accionando === u.id}
+                              className="text-xs px-2.5 py-1 rounded-md bg-green-50 text-green-700 hover:bg-green-100 transition-colors">Reactivar</button>
                           )}
                           {u.rol !== 'ADMIN' && u.estado === 'ACTIVO' && (
-                            <button
-                              onClick={() => accion(u.id, 'hacer_admin')}
-                              disabled={accionando === u.id}
-                              className="text-xs px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
-                            >
-                              → Admin
-                            </button>
+                            <button onClick={() => accion(u.id, 'hacer_admin')} disabled={accionando === u.id}
+                              className="text-xs px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors">→ Admin</button>
                           )}
                         </div>
                       )}

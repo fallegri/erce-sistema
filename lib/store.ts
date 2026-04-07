@@ -41,6 +41,7 @@ const defaultForm: RecepcionForm = {
   fecha_roma: '',
   fecha_erce: '',
   caso_abierto: true,
+  ciudad: '',
 }
 
 export const useRecepcionStore = create<RecepcionState>()((set) => ({

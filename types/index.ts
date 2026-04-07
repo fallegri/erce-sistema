@@ -7,6 +7,7 @@ export interface Usuario {
   nombre: string
   ci: string
   email: string
+  ciudad: string
   rol: UserRole
   estado: UserEstado
   created_at: string
@@ -17,6 +18,7 @@ export interface SessionUser {
   nombre: string
   email: string
   rol: UserRole
+  ciudad: string
 }
 
 // ─── Recepcion (Maestro) ─────────────────────────────────────────────────────
@@ -24,9 +26,10 @@ export interface Recepcion {
   id: number
   id_unico: string
   funcionario_entrega: string
-  fecha_roma: string      // ISO date string
-  fecha_erce: string      // ISO date string
+  fecha_roma: string
+  fecha_erce: string
   caso_abierto: boolean
+  ciudad: string
   usuario_id: number
   usuario_nombre?: string
   created_at: string
@@ -85,6 +88,7 @@ export interface RecepcionForm {
   fecha_roma: string
   fecha_erce: string
   caso_abierto: boolean
+  ciudad: string
 }
 
 // ─── API Responses ───────────────────────────────────────────────────────────

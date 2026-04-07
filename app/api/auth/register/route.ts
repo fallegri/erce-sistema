@@ -4,28 +4,19 @@ import { hashPassword } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
-    const { nombre, ci, email, password } = await req.json()
-
-    if (!nombre || !ci || !email || !password) {
+    const { nombre, ci, email, password, ciudad } = await req.json()
+    if (!nombre || !ci || !email || !password || !ciudad) {
       return NextResponse.json({ ok: false, error: 'Todos los campos son requeridos.' }, { status: 400 })
     }
-
-    const existing = await sql`
-      SELECT id FROM usuarios WHERE email = ${email} OR ci = ${ci}
-    `
+    const existing = await sql`SELECT id FROM usuarios WHERE email = ${email} OR ci = ${ci}`
     if (existing.length > 0) {
-      return NextResponse.json(
-        { ok: false, error: 'Ya existe un usuario con ese email o CI.' },
-        { status: 409 }
-      )
+      return NextResponse.json({ ok: false, error: 'Ya existe un usuario con ese email o CI.' }, { status: 409 })
     }
-
     const hash = await hashPassword(password)
     await sql`
-      INSERT INTO usuarios (nombre, ci, email, password_hash, rol, estado)
-      VALUES (${nombre}, ${ci}, ${email}, ${hash}, 'ERCE', 'PENDIENTE')
+      INSERT INTO usuarios (nombre, ci, email, password_hash, ciudad, rol, estado)
+      VALUES (${nombre}, ${ci}, ${email}, ${hash}, ${ciudad}, 'ERCE', 'PENDIENTE')
     `
-
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error(err)
