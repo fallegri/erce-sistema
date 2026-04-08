@@ -1,15 +1,14 @@
 {
   "name": "erce-sistema",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "db:push": "node lib/db-init.js"
+    "start": "next start"
   },
   "dependencies": {
-    "next": "14.2.5",
+    "next": "15.2.4",
     "react": "^18",
     "react-dom": "^18",
     "@neondatabase/serverless": "^0.9.4",
@@ -21,7 +20,10 @@
     "zustand": "^4.5.4",
     "@google/generative-ai": "^0.15.0",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.400.0"
+    "lucide-react": "^0.400.0",
+    "zod": "^3.23.8",
+    "dompurify": "^3.1.6",
+    "isomorphic-dompurify": "^2.14.0"
   },
   "devDependencies": {
     "typescript": "^5",

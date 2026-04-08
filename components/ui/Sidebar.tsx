@@ -51,7 +51,7 @@ export default function Sidebar({ user }: { user: SessionUser }) {
     if (user.rol !== 'ADMIN') return
     const load = () => {
       fetch('/api/aprobacion').then((r) => r.json()).then((d) => {
-        if (d.ok) setPendientes(d.data.pendientes)
+        if (d.ok) setPendientes(d.data.total ?? d.data.pendientes ?? 0)
       }).catch(() => {})
     }
     load()

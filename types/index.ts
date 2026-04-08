@@ -52,7 +52,9 @@ export interface Muestra {
   codigo_idif_manual: string | null
   tipos_estudio?: TipoEstudio[]
   analisis_ia?: string | null
+  alerta_ia?: string | null
   created_at: string
+  updated_at?: string
 }
 
 // ─── Parámetros ──────────────────────────────────────────────────────────────
@@ -81,6 +83,7 @@ export interface MuestraForm {
   codigo_idif_manual: string
   tipos_estudio_ids: number[]
   analisis_ia?: string | null
+  alerta_ia?: string | null
 }
 
 export interface RecepcionForm {
@@ -98,9 +101,20 @@ export interface ApiResponse<T = unknown> {
   error?: string
 }
 
-export interface AnalisisIA {
-  resumen: string
-  alertas: string[]
-  recomendaciones: string[]
-  nivel_prioridad: 'BAJO' | 'MEDIO' | 'ALTO' | 'CRITICO'
+// ─── Solicitudes de edición post-QR ──────────────────────────────────────────
+export interface SolicitudEdicion {
+  id: number
+  muestra_id: number
+  muestra_id_unico: string
+  nombre_muestra: string
+  usuario_id: number
+  solicitante_nombre: string
+  solicitante_email: string
+  datos_nuevos: MuestraForm
+  motivo: string
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA'
+  admin_id: number | null
+  admin_nota: string | null
+  created_at: string
+  resuelto_at: string | null
 }

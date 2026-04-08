@@ -1,53 +1,50 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { MuestraForm, AnalisisIA } from '@/types'
+import { MuestraForm } from '@/types'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
-export async function analizarMuestra(
-  muestra: MuestraForm,
-  tipoMuestraNombre: string,
-  tiposEstudioNombres: string[]
-): Promise<AnalisisIA> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-
-  const prompt = `
-Eres un asistente forense especializado en análisis de muestras periciales. 
-Analiza la siguiente muestra y devuelve ÚNICAMENTE un JSON válido con este esquema exacto:
-
-{
-  "resumen": "string - análisis conciso en 2-3 oraciones",
-  "alertas": ["array de strings - posibles inconsistencias o puntos críticos a verificar"],
-  "recomendaciones": ["array de strings - pasos de preservación y análisis recomendados"],
-  "nivel_prioridad": "BAJO|MEDIO|ALTO|CRITICO"
+export interface CoherenciaResult {
+  coherente: boolean
+  nivel_alerta: 'NINGUNA' | 'ADVERTENCIA' | 'CRITICA'
+  mensaje: string
+  sugerencias: string[]
 }
 
-DATOS DE LA MUESTRA:
-- Nombre: ${muestra.nombre_muestra}
-- Tipo de muestra: ${tipoMuestraNombre}
-- Pertenece a: ${muestra.pertenece_a}
-- Persona que recolectó: ${muestra.persona_recolecto}
-- Fecha de recolección: ${muestra.fecha_recoleccion}
-- Detalle adicional: ${muestra.detalle || 'Sin detalle'}
-- Estudios solicitados: ${tiposEstudioNombres.length > 0 ? tiposEstudioNombres.join(', ') : 'Ninguno'}
-- Código IDIF: ${muestra.codigo_idif_manual || 'No asignado'}
+// ── Validación automática de coherencia entre muestra y estudios ──────────────
+export async function validarCoherencia(
+  tipoMuestraNombre: string,
+  tiposEstudioNombres: string[],
+  nombreMuestra: string,
+  detalle: string
+): Promise<CoherenciaResult> {
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
-Responde SOLO con el JSON, sin texto adicional ni bloques de código markdown.
-`
+  const prompt = `Eres un experto en criminalística y cadena de custodia pericial.
+Analiza si existe coherencia entre el tipo de muestra y los estudios periciales solicitados.
+Responde ÚNICAMENTE con un JSON válido sin markdown:
+
+{
+  "coherente": boolean,
+  "nivel_alerta": "NINGUNA" | "ADVERTENCIA" | "CRITICA",
+  "mensaje": "string - explicación concisa en español (máx 200 chars)",
+  "sugerencias": ["array de correcciones sugeridas, vacío si es coherente"]
+}
+
+DATOS:
+- Tipo de muestra: ${tipoMuestraNombre}
+- Nombre/descripción: ${nombreMuestra}
+- Detalle: ${detalle || 'Sin detalle'}
+- Estudios solicitados: ${tiposEstudioNombres.length > 0 ? tiposEstudioNombres.join(', ') : 'Ninguno'}
+
+Ejemplos de INCOHERENCIA CRITICA: pedir ADN en una muestra de Documento; pedir Balística en Cabello; pedir Grafología en Tejido biológico.
+Ejemplos de ADVERTENCIA: pedir toxicología en huella dactilar (posible pero inusual); pedir serología en objeto físico sin contexto.
+Si no hay estudios solicitados, responde coherente=true, nivel_alerta="NINGUNA".`
 
   try {
     const result = await model.generateContent(prompt)
-    const text = result.response.text().trim()
-    
-    // Limpiar posibles backticks de markdown
-    const clean = text.replace(/```json|```/g, '').trim()
-    return JSON.parse(clean) as AnalisisIA
-  } catch (error) {
-    console.error('Error en análisis Gemini:', error)
-    return {
-      resumen: 'No se pudo completar el análisis automático. Revise manualmente.',
-      alertas: ['Error al contactar el servicio de IA'],
-      recomendaciones: ['Proceder con protocolo estándar de análisis manual'],
-      nivel_prioridad: 'MEDIO'
-    }
+    const text = result.response.text().trim().replace(/```json|```/g, '').trim()
+    return JSON.parse(text) as CoherenciaResult
+  } catch {
+    return { coherente: true, nivel_alerta: 'NINGUNA', mensaje: '', sugerencias: [] }
   }
 }
