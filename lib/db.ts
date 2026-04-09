@@ -7,7 +7,6 @@ if (!process.env.DATABASE_URL) {
 export const sql = neon(process.env.DATABASE_URL)
 
 export async function initSchema() {
-  // ── Core tables ──────────────────────────────────────────────────────────
   await sql`
     CREATE TABLE IF NOT EXISTS usuarios (
       id            SERIAL PRIMARY KEY,
@@ -78,7 +77,6 @@ export async function initSchema() {
       PRIMARY KEY (muestra_id, tipo_estudio_id)
     )`
 
-  -- ── Solicitudes de edición post-QR ────────────────────────────────────
   await sql`
     CREATE TABLE IF NOT EXISTS solicitudes_edicion (
       id            SERIAL PRIMARY KEY,
@@ -93,7 +91,6 @@ export async function initSchema() {
       resuelto_at   TIMESTAMPTZ
     )`
 
-  -- ── Audit log de seguridad ─────────────────────────────────────────────
   await sql`
     CREATE TABLE IF NOT EXISTS audit_log (
       id          SERIAL PRIMARY KEY,
@@ -107,7 +104,6 @@ export async function initSchema() {
       created_at  TIMESTAMPTZ DEFAULT NOW()
     )`
 
-  -- ── Rate limiting (intentos de login) ─────────────────────────────────
   await sql`
     CREATE TABLE IF NOT EXISTS login_attempts (
       id         SERIAL PRIMARY KEY,
@@ -116,19 +112,19 @@ export async function initSchema() {
       success    BOOLEAN NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`
+
   await sql`CREATE INDEX IF NOT EXISTS idx_login_attempts_ip_time ON login_attempts(ip, created_at)`
 
-  -- ── Seed data ──────────────────────────────────────────────────────────
   await sql`
     INSERT INTO tipos_muestra (nombre) VALUES
       ('Sangre'),('Suelo'),('Fibra'),('Cabello'),('Huella dactilar'),
-      ('Tejido biológico'),('Líquido biológico'),('Documento'),('Objeto físico'),('Otro')
+      ('Tejido biologico'),('Liquido biologico'),('Documento'),('Objeto fisico'),('Otro')
     ON CONFLICT (nombre) DO NOTHING`
 
   await sql`
     INSERT INTO tipos_estudio (nombre) VALUES
-      ('Análisis toxicológico'),('ADN / Genética forense'),('Balística'),
-      ('Grafología'),('Dactiloscopia'),('Serología'),('Entomología forense'),
-      ('Análisis químico'),('Documentología')
+      ('Analisis toxicologico'),('ADN / Genetica forense'),('Balistica'),
+      ('Grafologia'),('Dactiloscopia'),('Serologia'),('Entomologia forense'),
+      ('Analisis quimico'),('Documentologia')
     ON CONFLICT (nombre) DO NOTHING`
 }
