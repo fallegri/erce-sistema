@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     const sessionUser = { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol, ciudad: user.ciudad }
     const token = signToken(sessionUser)
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     cookieStore.set('erce_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
