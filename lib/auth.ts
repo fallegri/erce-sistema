@@ -30,7 +30,7 @@ export function verifyToken(token: string): SessionUser | null {
 }
 
 export async function getSession(): Promise<SessionUser | null> {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const token = cookieStore.get('erce_session')?.value
   if (!token) return null
   return verifyToken(token)
