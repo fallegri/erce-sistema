@@ -7,19 +7,27 @@ const MAX_ATTEMPTS = 5
 const WINDOW_MINUTES = 15
 
 export async function checkLoginRateLimit(ip: string, email: string): Promise<{ allowed: boolean; remaining: number }> {
-  const since = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString()
-  const rows = await sql`
-    SELECT COUNT(*)::int AS attempts FROM login_attempts
-    WHERE ip = ${ip} AND email = ${email} AND success = false AND created_at > ${since}`
-  const attempts = rows[0].attempts
-  return { allowed: attempts < MAX_ATTEMPTS, remaining: MAX_ATTEMPTS - attempts }
+  try {
+    const since = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString()
+    const rows = await sql`
+      SELECT COUNT(*)::int AS attempts FROM login_attempts
+      WHERE ip = ${ip} AND email = ${email} AND success = false AND created_at > ${since}`
+    const attempts = rows[0].attempts
+    return { allowed: attempts < MAX_ATTEMPTS, remaining: MAX_ATTEMPTS - attempts }
+  } catch {
+    // Table doesn't exist yet — allow login, run /api/init to create tables
+    return { allowed: true, remaining: MAX_ATTEMPTS }
+  }
 }
 
 export async function recordLoginAttempt(ip: string, email: string, success: boolean) {
-  await sql`INSERT INTO login_attempts (ip, email, success) VALUES (${ip}, ${email}, ${success})`
-  // Cleanup old entries periodically
-  if (Math.random() < 0.05) {
-    await sql`DELETE FROM login_attempts WHERE created_at < NOW() - INTERVAL '24 hours'`
+  try {
+    await sql`INSERT INTO login_attempts (ip, email, success) VALUES (${ip}, ${email}, ${success})`
+    if (Math.random() < 0.05) {
+      await sql`DELETE FROM login_attempts WHERE created_at < NOW() - INTERVAL '24 hours'`
+    }
+  } catch {
+    // Silently ignore if table doesn't exist yet
   }
 }
 
@@ -45,7 +53,9 @@ export async function auditLog(params: {
         ${params.user_agent ?? null},
         ${params.detalle ? JSON.stringify(params.detalle) : null}
       )`
-  } catch { /* audit should never break the app */ }
+  } catch {
+    // Silently ignore if table doesn't exist yet
+  }
 }
 
 // ─── IP extraction ────────────────────────────────────────────────────────────
@@ -61,8 +71,8 @@ export function getClientIp(req: NextRequest): string {
 export function sanitizeString(value: string): string {
   return value
     .trim()
-    .replace(/[<>'"`;]/g, '') // strip basic XSS chars
-    .substring(0, 1000)       // length cap
+    .replace(/[<>'"`;]/g, '')
+    .substring(0, 1000)
 }
 
 export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
@@ -73,7 +83,7 @@ export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
   return result as T
 }
 
-// ─── Zod schemas (server-side validation) ─────────────────────────────────────
+// ─── Zod schemas ─────────────────────────────────────────────────────────────
 export const loginSchema = z.object({
   email: z.string().email().max(254).toLowerCase(),
   password: z.string().min(6).max(128),
