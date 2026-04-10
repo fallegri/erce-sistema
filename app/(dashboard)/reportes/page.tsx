@@ -13,6 +13,7 @@ const TIPOS_REPORTE = [
   { key: 'sin_pericia',      label: 'Sin requerimiento pericial',  icono: '📋' },
   { key: 'por_entrega',      label: 'Por funcionario de entrega',  icono: '👤' },
   { key: 'por_ciudad',       label: 'Por ciudad',                  icono: '🏙️' },
+  { key: 'por_funcionario',  label: 'Registros por funcionario',   icono: '🗂️' },
 ]
 
 const STRING_COLS = ['ID Muestra', 'ID Recepcion', 'Codigo IDIF']
