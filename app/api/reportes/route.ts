@@ -32,7 +32,6 @@ export async function GET(req: NextRequest) {
             r.fecha_roma AS "Fecha ROMA", r.fecha_erce AS "Fecha ERCE",
             r.ciudad AS "Ciudad", r.caso_abierto AS "Caso Abierto",
             u.nombre AS "Registrado por", m.created_at AS "Fecha Registro",
-            COALESCE(m.updated_at, m.created_at) AS "Ultima Actualizacion"
           FROM muestras m
           JOIN recepciones r ON m.recepcion_id = r.id
           LEFT JOIN tipos_muestra tm ON m.tipo_muestra_id = tm.id
@@ -51,7 +50,6 @@ export async function GET(req: NextRequest) {
             r.fecha_roma AS "Fecha ROMA", r.fecha_erce AS "Fecha ERCE",
             r.ciudad AS "Ciudad", r.caso_abierto AS "Caso Abierto",
             u.nombre AS "Registrado por", m.created_at AS "Fecha Registro",
-            COALESCE(m.updated_at, m.created_at) AS "Ultima Actualizacion"
           FROM muestras m
           JOIN recepciones r ON m.recepcion_id = r.id
           LEFT JOIN tipos_muestra tm ON m.tipo_muestra_id = tm.id
@@ -69,7 +67,6 @@ export async function GET(req: NextRequest) {
             r.fecha_roma AS "Fecha ROMA", r.fecha_erce AS "Fecha ERCE",
             r.ciudad AS "Ciudad", r.caso_abierto AS "Caso Abierto",
             u.nombre AS "Registrado por", m.created_at AS "Fecha Registro",
-            COALESCE(m.updated_at, m.created_at) AS "Ultima Actualizacion"
           FROM muestras m
           JOIN recepciones r ON m.recepcion_id = r.id
           LEFT JOIN tipos_muestra tm ON m.tipo_muestra_id = tm.id
